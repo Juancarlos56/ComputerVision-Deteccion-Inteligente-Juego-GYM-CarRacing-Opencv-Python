@@ -34,6 +34,7 @@ def key_press(key, mod):
     global is_pressed_shift
     global is_pressed_esc
     global is_pressed_enter
+    print("-------key_press---------:",key)
     
     if key == 65361:
         is_pressed_left = True
@@ -54,6 +55,7 @@ def key_release(key, mod):
     global is_pressed_space
     global is_pressed_shift
     global is_pressed_enter
+    print("-------key_release---------:",key)
     if key == 65361:
         is_pressed_left = False
     if key == 65363:
@@ -69,6 +71,7 @@ def update_action():
     global steering_wheel
     global gas
     global break_system
+    print(";;;;;;;;;;;;;;;;;;;;;;;;;;",is_pressed_left ^ is_pressed_right )
     if is_pressed_left or is_pressed_right:
         if is_pressed_left:
             if steering_wheel > -1:
@@ -195,30 +198,20 @@ def unionAutoMasBordes(imagenAuto, imagenBordes):
 def moverAuto(key):
     global is_pressed_left
     global is_pressed_right
-    global is_pressed_shift
-    global is_pressed_space
+
     if key == 65361:
         is_pressed_left = True
     if key == 65363:
         is_pressed_right = True
-    if key == 32:
-        is_pressed_space = True
-    if key == 65505:
-        is_pressed_shift = True
 
 def moverAutoRelease(key):
     global is_pressed_left
     global is_pressed_right
-    global is_pressed_shift
-    global is_pressed_space
     if key == 65361:
         is_pressed_left = False
     if key == 65363:
         is_pressed_right = False
-    if key == 32:
-        is_pressed_space = False
-    if key == 65505:
-        is_pressed_shift = False
+    
 
 
 def controlDeteccionBordes2(unionImagenes, imagenAuto, imagenBordes):
@@ -253,7 +246,7 @@ def controlDeteccionBordes2(unionImagenes, imagenAuto, imagenBordes):
         for i in range(posicionImin, posicionImax):
             
             if imagenBordes[j][i] == 255 :
-                #print("j:",j , " pixel: ", imagenBordes[j][i], " i:",i)
+                print("j:",j , " pixel: ", imagenBordes[j][i], " i:",i)
                 #
                 if i < 180 :
                     #imagenBordes = cv.circle(imagenBordes,(i,j), 2, 255, 2) 
@@ -306,6 +299,9 @@ def on_high_V_thresh_trackbar(val):
     high_V = val 
 
 if __name__ == '__main__':
+    
+    
+
     env = gym.make('CarRacing-v0')
     state = env.reset()
     cv.namedWindow('frame', cv.WINDOW_AUTOSIZE)
@@ -333,30 +329,37 @@ if __name__ == '__main__':
         imagenUmbralizadaAuto = procesamientoImagenOPENCV(state)
         obtencionCentroDeMasaAuto(imagenUmbralizadaAuto)
         imagenUmbralizadaAuto = graficaDeCentroideImagen('centroMasaAuto', imagenUmbralizadaAuto)
+        
         imagenUmbralizadaCalle = procesamientoImagenCalle(state)
         imagenUmbrealizada = unionAutoMasBordes(imagenUmbralizadaAuto, imagenUmbralizadaCalle)
+        
         controlDeteccionBordes2(imagenUmbrealizada, imagenUmbralizadaAuto, imagenUmbralizadaCalle)
         
         if (is_pressed_enter == True):
             
-            #update_action()
-            diferencia = abs(contIzquierda - contDerecha)
-            print("Distancia: ", diferencia)
-            
-            if (contIzquierda > contDerecha and diferencia > 25):
-                moverAuto(65363)
+            update_action()
+            if (contIzquierda > contDerecha):
+                #while contDerecha < contIzquierda:
+                #mover a la derecha
+                #moverAuto(65363)
+                
+                #steering_wheel = steering_wheel+0.2
                 print("----------Mover a la derecha-----------")
                 
                 
                 
-            if (contDerecha > contIzquierda and diferencia > 25):
+            if (contDerecha > contIzquierda):
+                #while contIzquierda < contDerecha:
+                
+                #mover a la izquierda
                 moverAuto(65361)
+                #moverAutoRelease(65361)
+                #steering_wheel = steering_wheel-0.2
                 print("----------Mover a la izquierda-----------")
-
-            
-
+               
             update_action()
             action = [steering_wheel, gas, break_system]
+            print(" Volante, gas, sistema de frenos ", steering_wheel, gas, break_system)
             state, reward, done, info = env.step(action)
             counter += 1
             total_reward += reward
@@ -365,6 +368,8 @@ if __name__ == '__main__':
         else:     
             update_action()
             action = [steering_wheel, gas, break_system]
+            print(" +++++++++++++++++++++++++++++++++++++++++++++++")
+            print(" Volante, gas, sistema de frenos ", steering_wheel, gas, break_system)
             state, reward, done, info = env.step(action)
             counter += 1
             total_reward += reward
@@ -380,6 +385,4 @@ if __name__ == '__main__':
             
         moverAutoRelease(65363)
         moverAutoRelease(65361)
-        moverAutoRelease(65505)
-        #moverAutoRelease(65505)
     env.close()
