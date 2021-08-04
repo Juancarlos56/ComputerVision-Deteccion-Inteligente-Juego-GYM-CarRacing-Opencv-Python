@@ -1,1 +1,1 @@
-# OpenAI GYM CarRacing DQN
+# OpenAI GYM CarRacing con opencv python
